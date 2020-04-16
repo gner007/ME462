@@ -72,7 +72,7 @@ def arm_plot (x1,y1,z1,x2,y2,z2):
 # shows all steps in one fig    
 def arm_move (xi,yi,zi,xf,yf,zf,N=10):
     tetha0_i,tetha1_i,tetha2_i=IK(xi,yi,zi,-1)
-    tetha0_f,tetha1_f,tetha2_f=IK(xf,yf,zf-1)
+    tetha0_f,tetha1_f,tetha2_f=IK(xf,yf,zf,-1)
     delta_tetha1=(tetha1_f-tetha1_i)/N
     delta_tetha2=(tetha2_f-tetha2_i)/N
     delta_tetha0=(tetha0_f-tetha0_i)/N
