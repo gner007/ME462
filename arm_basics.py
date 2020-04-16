@@ -1,32 +1,47 @@
 # libraies
-from math import atan,sin,cos,pi,acos,atan2
+from math import atan,sin,cos,pi,acos,atan2,sqrt
 import numpy as np
 import matplotlib.pyplot as plt
+import cmath as c
+from mpl_toolkits.mplot3d import Axes3D
 
 # variables defaults
 l1=8; l2=6                  # constants  
-tetha_1=0; tetha_2=0        # angles 
-w_1=0; w_2=0                # derivatives 
-x_1=0; y_1=l1               # positions
-v_x_1=0; v_y_1=0            # derivatives
-x_2=x_1+0; y_1=y_1+l2       # positions
-v_x_2=0; v_y_2=0            # derivatives
+tetha_0=0; tetha_1=0; tetha_2=0        # angles  
+
+
+link1_pos=l1*c.exp(1j*tetha_1)
+link2_pos=l2*c.exp(1j*tetha_2)
+pin_pos=link1_pos+link2_pos
+
+r_pin=pin_pos.real
+z_pin=pin_pos.imag
 
 # inputs are angles of links 
 # outputs are position coordinates of links
-def FK(angle1,angle2):
-    x1=l1*cos(angle1)
-    x2=x1+l2*cos(angle1+angle2)
-    y1=l1*sin(angle1)
-    y2=y1+l2*sin(angle1+angle2)
-    return x1,y1,x2,y2
+def FK(angle0,angle1,angle2):
+    r1=l1*cos(angle1)
+    r2=r1+l2*cos(angle1+angle2)
+    z1=l1*sin(angle1)
+    z2=z1+l2*sin(angle1+angle2)
+    phi=angle0
+    
+    x1,y1=cylinder2xy(r1, phi)
+    x2,y2=cylinder2xy(r2, phi)
+    np.link1=[x1,y1,z1]
+    np.link2=[x2,y2,z2]
+    return np.link1,np.link2
 
 # inputs are position of link_2 and sign variable
 # outputs angles of links
-def IK(x,y,sign=-1):
-    angle2=sign*acos((x**2+y**2-l1**2-l2**2)/(2*l1*l2))
-    angle1=atan2(y,x)-atan2(l2*sin(angle2),(l1+l2*cos(angle2)))
-    return angle1,angle2
+def IK(x,y,z,sign=-1):
+    r,phi=xy2cylinder(x,y)
+    
+    angle0=phi
+    angle2=sign*acos((r**2+z**2-l1**2-l2**2)/(2*l1*l2))
+    angle1=atan2(z,r)-atan2(l2*sin(angle2),(l1+l2*cos(angle2)))
+    np.angles=[angle0, angle1, angle2]
+    return np.angles
 
 def velocity():
     
@@ -38,28 +53,35 @@ def angular_velocity():
 
 # inputs are positions of each links
 # output is a graph shows a    
-def arm_plot (x1,y1,x2,y2):
-    plt.plot([0, x1],[0,y1],'r-', linewidth=2)
-    plt.plot([x1,x2],[y1,y2],'r-', linewidth=2)
-    plt.plot([0],[0], marker="o",)
-    plt.plot([x1],[y1], marker="o")
-    plt.plot([x2],[y2], marker="o")
-    plt.xlim(-(l1+l2),l1+l2+1)
-    plt.ylim(-(l1+l2),l1+l2+1)
+def arm_plot (x1,y1,z1,x2,y2,z2):
+    ax = plt.gca(projection="3d")
+    x,y,z = [0,x1,x2],[0,y1,y2],[0,z1,z2]
+    ax.scatter(x,y,z, c='r',s=100)
+    ax.plot(x,y,z, color='r')
+    
+    ax.set_xlim3d(-l1-l2,l1+l2)
+    ax.set_ylim3d(-l1-l2,l1+l2)
+    ax.set_zlim3d(0,l1+l2)
+    ax.set_xlabel('X axis')
+    ax.set_ylabel('Y axis')
+    ax.set_zlabel('Z axis')
+    
+    plt.show()
       
 # inputs initial cordinates,final coordinates, Step
 # shows all steps in one fig    
-def arm_move (xi,yi,xf,yf,N=10):
-    tetha1_i,tetha2_i=IK(xi,yi,-1)
-    tetha1_f,tetha2_f=IK(xf,yf,-1)
+def arm_move (xi,yi,zi,xf,yf,zf,N=10):
+    tetha0_i,tetha1_i,tetha2_i=IK(xi,yi,zi,-1)
+    tetha0_f,tetha1_f,tetha2_f=IK(xf,yf,zf-1)
     delta_tetha1=(tetha1_f-tetha1_i)/N
     delta_tetha2=(tetha2_f-tetha2_i)/N
+    delta_tetha0=(tetha0_f-tetha0_i)/N
     plt.figure(1)
     plt.ion()
     i=0
     while i<N+1:     
-        x1,y1,x2,y2=FK(tetha1_i+delta_tetha1*i,tetha2_i+delta_tetha2*i)
-        arm_plot (x1,y1,x2,y2)
+        [x1,y1,z1],[x2,y2,z2]=FK(tetha0_i+delta_tetha0*i,tetha1_i+delta_tetha1*i,tetha2_i+delta_tetha2*i)
+        arm_plot (x1,y1,z1,x2,y2,z2)
         plt.draw()
         plt.pause(0.1)
         i=i+1
@@ -67,4 +89,17 @@ def arm_move (xi,yi,xf,yf,N=10):
     plt.show(3)
     plt.close
     
-arm_move (2,2,8,8,N=10)
+
+def cylinder2xy(r,phi):
+    x=r*cos(phi)
+    y=r*sin(phi)
+    return x,y
+    
+def xy2cylinder(x,y):
+    r=sqrt(x**2+y**2)
+    phi=atan2(y,x)
+    return r,phi    
+    
+    
+    
+arm_move (2,2,2,-2,8,8,N=10)
