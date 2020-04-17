@@ -43,13 +43,41 @@ def IK(x,y,z,sign=-1):
     np.angles=[angle0, angle1, angle2]
     return np.angles
 
-def velocity():
+# inputs are angles and desired angular velocities
+# outputs are corresponding linear velocities
+def linear_velocity(angle0,angle1,angle2,angle0_d,angle1_d,angle2_d):
+    xyz1,xyz2=FK(angle0,angle1,angle2)
+    x=xyz2[0]
+    y=xyz2[1]
+    z=xyz2[2]
+    r=sqrt(x**2+y**2)
     
-    return
+    np.Jacobian_1_tetha12_rz=([-l1*sin(angle1)-l2*sin(angle1+angle2), -l2*sin(angle1+angle2)],[l1*cos(angle1)+l2*cos(angle1+angle2), l2*cos(angle1+angle2)])
+    np.Jacobian_1_inv_rz_tetha12=np.linalg.inv(np.Jacobian_1_tetha12_rz)    
+    np.Jacobian_2_rphi_xy=([cos(angle0),-r*sin(angle0)],[sin(angle0),r*cos(angle0)])
+    np.Jacobian_2_inv_xy_rphi=np.linalg.inv(np.Jacobian_2_rphi_xy)    
+    
+    r_d,z_d=np.dot(np.Jacobian_1_tetha12_rz,([angle1_d],[angle2_d]))
+    x_d,y_d=np.dot(np.Jacobian_2_rphi_xy,([r_d],[angle0_d]))
+    return x_d,y_d,z_d
 
-def angular_velocity():
+# inputs are angles and desired linear velocities
+# outputs are corresponding angular velocities
+def angular_velocity(angle0,angle1,angle2,x_d,y_d,z_d):
+    xyz1,xyz2=FK(angle0,angle1,angle2)
+    x=xyz2[0]
+    y=xyz2[1]
+    z=xyz2[2]
+    r=sqrt(x**2+y**2)
     
-    return
+    np.Jacobian_1_tetha12_rz=([-l1*sin(angle1)-l2*sin(angle1+angle2), -l2*sin(angle1+angle2)],[l1*cos(angle1)+l2*cos(angle1+angle2), l2*cos(angle1+angle2)])
+    np.Jacobian_1_inv_rz_tetha12=np.linalg.inv(np.Jacobian_1_tetha12_rz)    
+    np.Jacobian_2_rphi_xy=([cos(angle0),-r*sin(angle0)],[sin(angle0),r*cos(angle0)])
+    np.Jacobian_2_inv_xy_rphi=np.linalg.inv(np.Jacobian_2_rphi_xy)
+    
+    r_d,angle0_d=np.dot(np.Jacobian_2_inv_xy_rphi,([x_d],[y_d]))
+    angle1_d,angle2_d=np.dot(np.Jacobian_1_inv_rz_tetha12,([r_d],[z_d]))
+    return angle0_d,angle1_d,angle2_d
 
 # inputs are positions of each links
 # output is a graph shows a    
@@ -102,4 +130,4 @@ def xy2cylinder(x,y):
     
     
     
-arm_move (2,2,2,-2,8,8,N=10)
+arm_move (2,2,2,0,0,14,N=10)
