@@ -7,10 +7,10 @@ import time
 
 start = time.time()
 print("Loading Encodings")
-data = pickle.loads(open("model.pickle", "rb").read())
+data = pickle.loads(open("model_rev.pickle", "rb").read())
 
 
-image = cv2.imread("test15.jpeg")
+image = cv2.imread("test2.jpeg")
 rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
 print("Face Detection using HoG")
@@ -30,18 +30,20 @@ for encoding in encodings:
 	matches = face_recognition.compare_faces(data["encodings"], encoding)
 
 	name = "Unknown"
-	counts = {}
+	counts = {"Mehmet":0,"Omer":0}
 	flag = False
+	marker=0
 
 	for match in matches:
-		marker=0
+		
 		if match == True:
 
 			name = data["names"][marker]
-			counts[name] = counts.get(name,0) + 1
+			counts[name] = counts.get(name) + 1
 			flag = True
 
 		marker+=1
+
 
 	if flag:
 		name = max(counts, key=counts.get)
