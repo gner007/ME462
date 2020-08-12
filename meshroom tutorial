@@ -1,0 +1,97 @@
+This documentation is a basic tutorial to use meshroom with scripting.
+
+Meshroom version : meshroom 2019.2.0
+
+operating at conda environmet
+
+First of all, the quality of input images are important for output quality. Be careful and do not shake
+the camera. Also a good camera is advised.
+After the meshroom setup everything is trivial. You will create some folders and put the related images
+to one folder and related codes in another folder and change the bat file’s inside according the folders
+names and directory. That is all. Before get into detail, we need to understand the workflow of the
+meshroom to make everything more meaningful.
+
+The workflow is ordered as follow:
+1) CameraInit
+2) FeatureExtraction
+3) ImageMatching
+4) FeatureMatching
+5) StructureFromMotion
+6) PrepareDenseScene
+7) DepthMap
+8) DepthMapFilter
+9) Meshing
+10)MeshFiltering
+11) Texturing
+
+This processes are done to obtain textured 3d obj file from images. All the steps can be done from cmd
+individually with the commands below.
+
+Run_00_CameraInit(baseDir,binDir,srcImageDir)
+Run_01_FeatureExtraction(baseDir,binDir,numImages)
+Run_02_ImageMatching(baseDir,binDir)
+Run_03_FeatureMatching(baseDir,binDir)
+Run_04_StructureFromMotion(baseDir,binDir)
+Run_05_PrepareDenseScene(baseDir,binDir)
+Run_07_DepthMap(baseDir,binDir,numImages,3,srcImageDir)
+Run_08_DepthMapFilter(baseDir,binDir)
+Run_09_Meshing(baseDir,binDir)
+Run_10_MeshFiltering(baseDir,binDir)
+Run_11_Texturing(baseDir,binDir)
+
+However if you do not want to do all steps one by one you need use the run_alicevision.py code. This
+code take all inputs at once. All the processes done with default parameters. If you want to change
+parameters, you need to change the run_alicevision.py file. However default parameters are suitable
+for lots of cases.
+
+The inputs are as follow:
+
+baseDir = sys.argv[1]
+srcImageDir = sys.argv[2]
+binDir = sys.argv[3]
+numImages = int(sys.argv[4])
+runStep = sys.argv[5]
+
+baseDir is the directory that includes run_alicevision.py
+
+srcImageDir i is the output directory
+
+binDir is the directory that includes the input images and the srcImageDir file
+
+numImages is the number of the images in my case it is 14
+
+runStep is which process will done. It can be run01, run02 ... If you want to do all steps in ordered as
+
+my workflow you can select runall as runStep.
+
+In my case inside the bat file is that:
+
+call conda activate base
+pause
+python "C:\Users\guner\OneDrive\Documents\cifcif\run_alicevision\run_alicevision.py" "C:\Users\
+guner\OneDrive\Documents\cifcif\Copper plastic\trials" "C:\Users\guner\OneDrive\Documents\cifcif\
+Copper plastic" "C:\Meshroom-2019.2.0\aliceVision\bin" 14 runall
+pause
+
+First I need to activate conda environment, then the inputs are writen.
+
+baseDir "C:\Users\guner\OneDrive\Documents\cifcif\run_alicevision\run_alicevision.py"
+srcImageDir "C:\Users\guner\OneDrive\Documents\cifcif\Copper plastic\trials"
+binDir "C:\Users\guner\OneDrive\Documents\cifcif\Copper plastic"
+numImages 14
+runStep runall
+
+according to directories above, in cifcif file there are two file Copper plastic and run_alicevision files.
+
+In run_alicevision (baseDir) file there must be the files that can be find run_alicevision.rar in the drive
+link below. Also, the drive link is in the github page https://github.com/gner007/ME462.
+https://drive.google.com/open?id=1nRKS4BpBA7EF8vSR5gmsCcrlI_dkPO69
+
+In copper plastic file there is a file named as trials (srcImageDir). This file must be empty before the
+bat file is started. Moreover, in copper plastic file (binDir) there must be the images and the output
+directory (srcImageDir) (trials for this case).
+After all, the bat file must be changed according the number of images and folder names and
+directories. That is all. If there will be problems during 3d reconstruction, restarting the computer is
+advised. After restarting delete the files in srcImageDir and start bat file again.
+
+Bat file can be found in github page. Name is run.bat.
